@@ -1,0 +1,13 @@
+The system uses horizontal scaling to handle peak traffic loads. Additional application instances are automatically provisioned using Kubernetes autoscaling policies.
+
+Caching is implemented using Redis to reduce database pressure during periods of high request volume. Frequently accessed records are served directly from memory.
+
+The architecture includes a load balancer that distributes incoming traffic evenly across backend services. This prevents any single node from becoming overloaded.
+
+Database replication is configured to improve read throughput and provide high availability. Read replicas serve analytical queries separately from transactional workloads.
+
+Asynchronous message queues are used to decouple services and smooth traffic spikes. Tasks are processed in the background to avoid blocking client requests.
+
+Rate limiting protects the API from abuse and ensures fair resource allocation among users during periods of elevated demand.
+
+Monitoring tools continuously track CPU, memory usage, and request latency. Alerts are triggered when predefined thresholds are exceeded.
