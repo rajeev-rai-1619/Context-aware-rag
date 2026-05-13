@@ -2,7 +2,7 @@ from app.embedding_service import EmbeddingService
 from app.vector_store import VectorStore
 from app.retriever import Retriever
 from app.dataset import DatasetLoader
-from app.mock_models import MockGenerativeModel
+from app.mock_vertex_ai import GenerativeModel
 
 
 class RAGPipeline:
@@ -14,7 +14,8 @@ class RAGPipeline:
         self.vector_store = None
         self.retriever = None
 
-        self.query_expander = MockGenerativeModel()
+        # Mock of vertexai.generative_models.GenerativeModel
+        self.query_expander = GenerativeModel("gemini-1.5-pro")
 
     def ingest_documents(self, file_path: str):
 
@@ -55,7 +56,8 @@ class RAGPipeline:
         top_k: int = 3
     ):
 
-        expanded_query = self.query_expander.generate_content(query)
+        response = self.query_expander.generate_content(query)
+        expanded_query = response.text
 
         results = self.retriever.retrieve(
             query=expanded_query,
