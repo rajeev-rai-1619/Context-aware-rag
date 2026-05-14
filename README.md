@@ -72,11 +72,7 @@ CON-RAG/
 │   └── sample_docs.txt        # 7 technical paragraphs
 ├── tests/
 │   ├── conftest.py
-│   ├── test_dataset.py
-│   ├── test_mock_vertex_ai.py
-│   ├── test_rag_pipeline.py
-│   ├── test_retriever.py
-│   └── test_vector_store.py
+│   └── test_rag_pipeline.py
 ├── main.py                    # Runs the 3-query benchmark
 ├── benchmark_results.json     # (generated) machine-readable results
 ├── retrieval_benchmark.md     # Dev evidence: Strategy A vs Strategy B
@@ -302,23 +298,18 @@ pip install -r requirements.txt
 python -m pytest -q
 ```
 
-The suite covers:
+The suite is intentionally focused on the requirement from the problem
+statement: *"Pytest suites verifying the retrieval pipeline and mocking
+the GCP SDK."*
 
-- [`tests/test_dataset.py`](tests/test_dataset.py) — paragraph chunking.
-- [`tests/test_vector_store.py`](tests/test_vector_store.py) — cosine
-  ranking semantics, top-k ordering.
-- [`tests/test_retriever.py`](tests/test_retriever.py) — rank assignment,
-  delegation (uses `MagicMock` for the SDK).
-- [`tests/test_mock_vertex_ai.py`](tests/test_mock_vertex_ai.py) — mock
-  SDK surface conformance; gracefully skipped if the embedding model
-  cannot be fetched offline.
 - [`tests/test_rag_pipeline.py`](tests/test_rag_pipeline.py) —
-  end-to-end pipeline with `unittest.mock.patch` substituting the
-  Vertex AI SDK classes entirely (this is the GCP-SDK-mocking pattern
-  the problem statement asks for).
-
-Expected: `16 passed` (or `13 passed, 3 skipped` on machines without
-network access to Hugging Face).
+  end-to-end `RAGPipeline` test that uses `unittest.mock.patch` to
+  substitute both Vertex AI SDK classes (`TextEmbeddingModel` and
+  `GenerativeModel`) with lightweight fakes. This is the canonical
+  GCP-SDK-mocking pattern: replace the SDK symbols at the import site
+  with deterministic doubles and assert pipeline behaviour
+  (ingestion, Strategy A retrieval, Strategy B query expansion, and the
+  cosine-score uplift from expansion).
 
 ---
 
