@@ -1,48 +1,70 @@
-# from app.embedding_service import EmbeddingService
-# from app.vector_store import VectorStore
-
-# docs = [
-#     "Kubernetes autoscaling handles peak traffic loads.",
-#     "Redis caching reduces database pressure.",
-#     "Load balancers distribute traffic evenly."
-# ]
-
-# embedding_service = EmbeddingService()
-
-# doc_embeddings = embedding_service.embed_documents(docs)
-
-# dimension = doc_embeddings.shape[1]
-
-# vector_store = VectorStore(dimension)
-
-# vector_store.add_embeddings(doc_embeddings, docs)
-
-# query = "How does the system manage heavy traffic?"
-
-# query_embedding = embedding_service.embed_text(query)
-
-# results = vector_store.search(query_embedding)
-
-# for result in results:
-#     print(result)
-
-
+import json
 from app.rag_pipeline import RAGPipeline
 
 
 pipeline = RAGPipeline()
-
 pipeline.ingest_documents("data/sample_docs.txt")
 
-query = "How does the system handle peak load?"
 
-results = pipeline.search(query)
+queries = [
 
-print("\n=== Retrieval Results ===\n")
+    "How does the system handle peak load?",
 
-for idx, result in enumerate(results, start=1):
+    "How is database performance improved?",
 
-    print(f"Rank {idx}")
-    print(f"Score: {result['score']:.4f}")
-    print(result["document"])
-    print("-" * 60)
+    "How are failures monitored?"
+]
+
+
+benchmark_results = []
+
+
+for query in queries:
+
+    print("\n" + "=" * 80)
+    print(f"QUERY: {query}")
+    print("=" * 80)
+
+    strategy_a_results = pipeline.search_raw(query)
+
+    print("\nSTRATEGY A: RAW VECTOR SEARCH\n")
+
+    for result in strategy_a_results:
+
+        print(f"Rank #{result['rank']}")
+        print(f"Score: {result['score']:.4f}")
+        print(result["document"])
+        print("-" * 60)
+
+    strategy_b_output = pipeline.search_expanded(query)
+
+    print("\nSTRATEGY B: AI-ENHANCED RETRIEVAL\n")
+
+    print(f"Expanded Query:")
+    print(strategy_b_output["expanded_query"])
+    print()
+
+    for result in strategy_b_output["results"]:
+
+        print(f"Rank #{result['rank']}")
+        print(f"Score: {result['score']:.4f}")
+        print(result["document"])
+        print("-" * 60)
+
+    benchmark_results.append({
+        "query": query,
+        "strategy_a": strategy_a_results,
+        "strategy_b": strategy_b_output
+    })
+
+
+# SAVE BENCHMARK JSON
+with open("benchmark_results.json", "w") as file:
+
+    json.dump(
+        benchmark_results,
+        file,
+        indent=2
+    )
+
+print("\nBenchmark results saved to benchmark_results.json")

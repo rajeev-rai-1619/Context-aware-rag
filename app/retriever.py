@@ -27,4 +27,7 @@ class Retriever:
             top_k=top_k
         )
 
+        for rank, result in enumerate(results, start=1):
+            result["rank"] = rank
+
         return results
